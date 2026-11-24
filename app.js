@@ -110,7 +110,7 @@ function oggi(){
   return `${hero}
   <div class="card"><div class="ln" style="display:grid;gap:6px"><div><span class="mut">Mattina</span><br>${esc(d.am)}</div><div><span class="mut">Sera</span><br>${esc(d.pm)}</div></div></div>
   <h2>Questa settimana</h2><div class="strip">${wd.map((x,i)=>`<button data-a="day" data-i="${i}" class="${i===dow()?"today":""} ${trained(x)?"done":""} ${i===vi?"sel":""}">${DAYS[i]}<b>${+x.slice(8)}</b><u></u></button>`).join("")}</div>
-  <h2>Che energia hai oggi?</h2><div class="tl">${Object.entries(TRAFFIC).map(([key,v])=>`<button class="${key} ${tr===key?"on":""}" data-a="tr" data-k="${key}">${FACE[key]}${v.t}</button>`).join("")}</div>
+  <h2>Come ti senti oggi?</h2><div class="tl">${Object.entries(TRAFFIC).map(([key,v])=>`<button class="${key} ${tr===key?"on":""}" data-a="tr" data-k="${key}">${FACE[key]}${v.t}</button>`).join("")}</div>
   ${tr?`<div class="hint">${esc(TRAFFIC[tr].d)}</div>`:`<div class="mut" style="margin:8px 4px">Un tocco: lo registro per aiutarti a capire come vai nel tempo.</div>`}
   <h2>Fase del ciclo</h2><div class="card"><span class="tag">${esc(phaseFor(cycleWeek()).t)}</span><div class="mut" style="margin-top:6px">${esc(phaseFor(cycleWeek()).d)}</div>${rawWeek()>8?`<div class="hint">Ciclo di 8 settimane completato: valuta i progressi e riparti dalle impostazioni.</div>`:""}</div>
   <div class="card mut">💡 ${esc(MYTHS[new Date().getDate()%MYTHS.length])}</div>`;
@@ -216,7 +216,7 @@ function checkin(){
   ${stepper("protein",`Proteine (obiettivo ${tp[0]}–${tp[1]} g)`,10,"g")}${stepper("water","Acqua (litri)",.25,"L")}
   <details><summary>Misure (ogni 2–4 settimane)</summary>${stepper("waist","Vita (cm)",.5,"cm")}${stepper("hips","Fianchi (cm)",.5,"cm")}</details>
   <label class="l">Note / ciclo (facoltativo)</label><input type="text" value="${esc(c.note||"")}" data-c="ci" data-k="note" placeholder="Es. gambe pesanti"></div>
-  <h2>Energia ultimi 14 giorni</h2><div class="card"><div class="moods">${moodStrip()}</div>${moodNote()}</div>
+  <h2>Come ti sei sentito negli ultimi 14 giorni</h2><div class="card"><div class="moods">${moodStrip()}</div>${moodNote()}</div>
   <h2>Andamento</h2><div class="seg">${Object.entries(METRICS).map(([k,m])=>`<button class="${metric===k?"on":""}" data-a="metric" data-k="${k}">${m[0]}</button>`).join("")}</div>
   <div class="card"><div class="mut">Media ultimi 7: <b>${av} ${METRICS[metric][1]}</b></div>${chart(pts,METRICS[metric][2]," "+METRICS[metric][1])}</div>
   <div class="hint">Peso stabile ≠ fallimento. Dopo 8–12 settimane valuta carichi/rep, misure e foto. Se la forza cala e la fatica sale, controlla recupero e alimentazione prima di tagliare calorie.</div>`;
@@ -227,9 +227,9 @@ function moodStrip(){
   return out.join("");
 }
 function moodNote(){
-  const e=Object.entries(S.traffic);if(e.length<14)return `<div class="mut" style="margin-top:8px">Dopo 2 settimane di dati qui vedrai come cambia la tua energia.</div>`;
+  const e=Object.entries(S.traffic);if(e.length<14)return `<div class="mut" style="margin-top:8px">Dopo 2 settimane di dati qui vedrai come cambia il tuo stato di forma.</div>`;
   const c={verde:0,giallo:0,rosso:0};e.forEach(([,v])=>c[v]++);
-  return `<div class="mut" style="margin-top:8px">Finora: ${c.verde} giorni Carica!, ${c.giallo} Si va, ${c.rosso} Pianino.</div>`;
+  return `<div class="mut" style="margin-top:8px">Finora: ${c.verde} giorni Top, ${c.giallo} Così così, ${c.rosso} Non in forma.</div>`;
 }
 
 // ---------- IMPOSTAZIONI ----------

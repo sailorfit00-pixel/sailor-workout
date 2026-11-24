@@ -68,9 +68,9 @@ const RUN = [
 ];
 
 const TRAFFIC = {
-  verde:{t:"Carica!",d:"Ottima energia: oggi spingi come da programma, con tecnica pulita."},
-  giallo:{t:"Si va",d:"Energia nella media: allenati come previsto, ma se qualcosa pesa togli un accessorio e lascia 1–2 ripetizioni in riserva. Se domani hai un salto impegnativo, non andare a cedimento."},
-  rosso:{t:"Pianino",d:"Oggi ascolta il corpo: scheda leggera, solo mobilità o una camminata sono scelte valide. Dolore, vertigini o malessere: fermati e chiedi un parere a un professionista."}
+  verde:{t:"Top",d:"Ti senti al top: oggi spingi come da programma, con tecnica pulita."},
+  giallo:{t:"Così così",d:"Giornata nella media: allenati come previsto, ma se qualcosa pesa togli un accessorio e lascia 1–2 ripetizioni in riserva. Se domani hai un salto impegnativo, non andare a cedimento."},
+  rosso:{t:"Non in forma",d:"Oggi non ti senti in forma, ascolta il corpo: scheda leggera, solo mobilità o una camminata sono scelte valide. Dolore, vertigini o malessere: fermati e chiedi un parere a un professionista."}
 };
 
 const MOBILITY = {
