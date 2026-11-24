@@ -1,7 +1,7 @@
 const KEY="sailor-workout-v1";
 const iso=d=>{const x=new Date(d);return new Date(x.getTime()-x.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
 const today=()=>iso(new Date());
-const defState=()=>({plan:"A",start:today(),logs:{},checkins:[],runDone:{},traffic:{},tab:"oggi",theme:"auto",openW:null});
+const defState=()=>({plan:"A",start:today(),logs:{},checkins:[],runDone:{},traffic:{},tab:"oggi",theme:"auto",openW:null,mob:{}});
 let S;try{S=Object.assign(defState(),JSON.parse(localStorage.getItem(KEY)||"{}"))}catch(e){S=defState()}
 const save=()=>localStorage.setItem(KEY,JSON.stringify(S));
 const $=s=>document.querySelector(s);
@@ -38,7 +38,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)wake(wantW
 const wantWake=()=>!!run||(S.tab==="pesi"&&!!S.openW);
 
 // ---------- navigazione ----------
-function go(t,keep){S.tab=t;if(t!=="pesi"&&!keep)S.openW=S.openW;save();render(false)}
+function go(t,keep){if(t==="oggi")viewDay=null;S.tab=t;if(t!=="pesi"&&!keep)S.openW=S.openW;save();render(false)}
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{if(b.dataset.t==="pesi"&&S.tab==="pesi")S.openW=null;go(b.dataset.t)});
 const TITLES={oggi:"Oggi",settimana:"Settimana",pesi:"Pesi",corsa:"Corsa",checkin:"Check-in",setup:"Impostazioni"};
 function render(keepScroll=true){
@@ -76,8 +76,8 @@ function suggest(ex){
   if(ds.length>=ex.sets&&ds.every(s=>num(s.rep)>=hi)){const nk=Math.round(kg*1.03*2)/2;return{up:true,kg:Math.max(nk,kg+.5),txt:`Hai chiuso ${hi} rep a ${kg} kg → prova ${Math.max(nk,kg+.5)} kg (+2–5%) e riparti da ${lo}–${lo+2} rep.`}}
   return{up:false,txt:`Resta a ${kg} kg e punta a ${hi} rep su tutte le serie.`};
 }
-function progress(k){
-  let d=0,t=0;WORKOUTS[k].ex.forEach(ex=>{t+=ex.sets;const e=(S.logs[ex.id]||[]).find(e=>e.d===today());if(e)d+=e.sets.filter(s=>s.done).length});
+function progress(k,dt=today()){
+  let d=0,t=0;WORKOUTS[k].ex.forEach(ex=>{t+=ex.sets;const e=(S.logs[ex.id]||[]).find(e=>e.d===dt);if(e)d+=e.sets.filter(s=>s.done).length});
   return{d,t,pct:t?Math.round(d/t*100):0};
 }
 const restSecs=ex=>{const m=String(ex.rest).match(/(\d+)/);return m?(/min/.test(ex.rest)?+m[1]*60:+m[1]):90};
@@ -95,21 +95,23 @@ function chart(pts,color,unit){
 // ---------- OGGI ----------
 function weekDates(){const n=new Date(),m=new Date(n);m.setDate(n.getDate()-dow());return Array.from({length:7},(_,i)=>{const d=new Date(m);d.setDate(m.getDate()+i);return iso(d)})}
 function trained(date){return Object.values(S.logs).some(a=>a.some(e=>e.d===date&&e.sets.some(s=>s.done)))}
+let viewDay=null,viewDate=today();
+function curDay(){if(viewDate!==today()){viewDay=null;viewDate=today()}return viewDay??dow()}
 function oggi(){
-  const d=WEEK[S.plan][dow()],tr=S.traffic[today()],k=d.key&&WORKOUTS[d.key]&&!(d.key==="RUN")?d.key:null;
-  const dt=new Date().toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});
+  const vi=curDay(),isT=vi===dow(),wd=weekDates(),vdate=wd[vi];
+  const d=WEEK[S.plan][vi],tr=S.traffic[today()],k=d.key&&WORKOUTS[d.key]&&!(d.key==="RUN")?d.key:null;
+  const dt=new Date(vdate+"T12:00").toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});
   let hero;
-  if(k){const p=progress(k),w=WORKOUTS[k];
+  if(k){const p=progress(k,vdate),w=WORKOUTS[k];
     hero=`<div class="card hero"><div class="mut">${esc(dt)}</div><h3 style="font-size:22px;margin-top:4px">Scheda ${esc(w.name)}</h3><div class="mut">${esc(w.dur)} · ${w.ex.length} esercizi</div>
     <div class="bar"><i style="width:${p.pct}%"></i></div><div class="mut" style="margin-top:4px">${p.d}/${p.t} serie${p.pct===100?" · completata 🎉":""}</div>
-    <button class="btn" data-a="open" data-w="${k}">${p.d?(p.pct===100?"Rivedi scheda":"Continua allenamento"):"Inizia allenamento"}</button></div>`}
+    <button class="btn" data-a="open" data-w="${k}">${!isT?"Vedi scheda":p.d?(p.pct===100?"Rivedi scheda":"Continua allenamento"):"Inizia allenamento"}</button></div>`}
   else hero=`<div class="card hero"><div class="mut">${esc(dt)}</div><h3 style="font-size:22px;margin-top:4px">${d.key==="RUN"?"Giorno corsa facile (opzionale)":"Oggi niente pesi"}</h3><div class="mut">${esc(d.note)}</div>${d.key==="RUN"?`<button class="btn" data-a="tab" data-t="corsa">Vai alla corsa</button>`:""}</div>`;
-  const wd=weekDates();
   return `${hero}
   <div class="card"><div class="ln" style="display:grid;gap:6px"><div><span class="mut">Mattina</span><br>${esc(d.am)}</div><div><span class="mut">Sera</span><br>${esc(d.pm)}</div></div></div>
-  <h2>Questa settimana</h2><div class="strip">${wd.map((x,i)=>`<div class="${i===dow()?"today":""} ${trained(x)?"done":""}">${DAYS[i]}<b>${+x.slice(8)}</b></div>`).join("")}</div>
-  <h2>Come ti senti oggi?</h2><div class="tl">${Object.entries(TRAFFIC).map(([key,v])=>`<button class="${key} ${tr===key?"on":""}" data-a="tr" data-k="${key}">${FACE[key]}${v.t}</button>`).join("")}</div>
-  ${tr?`<div class="hint">${esc(TRAFFIC[tr].d)}</div>`:`<div class="mut" style="margin:8px 4px">Tocca per avere il consiglio sul carico di oggi.</div>`}
+  <h2>Questa settimana</h2><div class="strip">${wd.map((x,i)=>`<button data-a="day" data-i="${i}" class="${i===dow()?"today":""} ${trained(x)?"done":""} ${i===vi?"sel":""}">${DAYS[i]}<b>${+x.slice(8)}</b><u></u></button>`).join("")}</div>
+  <h2>Che energia hai oggi?</h2><div class="tl">${Object.entries(TRAFFIC).map(([key,v])=>`<button class="${key} ${tr===key?"on":""}" data-a="tr" data-k="${key}">${FACE[key]}${v.t}</button>`).join("")}</div>
+  ${tr?`<div class="hint">${esc(TRAFFIC[tr].d)}</div>`:`<div class="mut" style="margin:8px 4px">Un tocco: lo registro per aiutarti a capire come vai nel tempo.</div>`}
   <h2>Fase del ciclo</h2><div class="card"><span class="tag">${esc(phaseFor(cycleWeek()).t)}</span><div class="mut" style="margin-top:6px">${esc(phaseFor(cycleWeek()).d)}</div>${rawWeek()>8?`<div class="hint">Ciclo di 8 settimane completato: valuta i progressi e riparti dalle impostazioni.</div>`:""}</div>
   <div class="card mut">💡 ${esc(MYTHS[new Date().getDate()%MYTHS.length])}</div>`;
 }
@@ -131,7 +133,7 @@ function pesi(){
   const w=WORKOUTS[k],deload=cycleWeek()===7,p=progress(k);
   return `<button class="back" data-a="back">‹ Schede</button><h3 style="font-size:22px;margin:0 4px">${esc(w.name)}</h3>
   <div class="bar" style="margin:10px 4px;background:var(--line)"><i style="width:${p.pct}%"></i></div><div class="mut" style="margin:0 4px">${p.d}/${p.t} serie completate</div>
-  <details class="card"><summary>Come scaldarti</summary><div class="mut">${esc(w.warm)}</div></details>
+  ${mobBlock(k,w)}
   ${deload?`<div class="hint warn">Settimana 7 – scarico: riduci di circa 30–40% le serie (es. ${Math.max(1,w.ex[0].sets-1)} invece di ${w.ex[0].sets}).</div>`:""}
   ${w.ex.map(ex=>{
     const d=getDraft(ex),sg=suggest(ex),fin=d.sets.every(s=>s.done),pr=prevLog(ex.id);
@@ -145,6 +147,12 @@ function pesi(){
     <div class="mut" style="margin:12px 2px 6px">Quante ripetizioni ti restavano? (RIR)</div>
     <div class="chips">${[0,1,2,3,4].map(r=>`<button class="${d.rir===r?"on":""}" data-a="rir" data-e="${ex.id}" data-r="${r}">${r===4?"4+":r}</button>`).join("")}</div>
     <details><summary>Consigli tecnici e andamento</summary><div class="mut">${esc(ex.tip)}</div>${chart(pts,"var(--pri)"," kg")}</details></div>`}).join("")}`;
+}
+
+function mobBlock(k,w){
+  const m=(S.mob[today()]||{})[k]||{},list=MOBILITY[k]||[],n=list.filter((_,i)=>m[i]).length;
+  return `<div class="card"><div class="row sp"><h3>Riscaldamento e mobilità</h3><span class="tag" style="flex:none">${n}/${list.length}</span></div><div class="mut" style="margin-bottom:6px">${esc(w.warm)}</div>
+  ${list.map((x,i)=>`<button class="mob ${m[i]?"on":""}" data-a="mob" data-w="${k}" data-i="${i}"><span class="mk">${m[i]?ICON.check:""}</span><span><b>${esc(x[0])}</b> · ${esc(x[1])}<br><span class="mut">${esc(x[2])}</span></span></button>`).join("")}</div>`;
 }
 
 // ---------- CORSA ----------
@@ -208,9 +216,20 @@ function checkin(){
   ${stepper("protein",`Proteine (obiettivo ${tp[0]}–${tp[1]} g)`,10,"g")}${stepper("water","Acqua (litri)",.25,"L")}
   <details><summary>Misure (ogni 2–4 settimane)</summary>${stepper("waist","Vita (cm)",.5,"cm")}${stepper("hips","Fianchi (cm)",.5,"cm")}</details>
   <label class="l">Note / ciclo (facoltativo)</label><input type="text" value="${esc(c.note||"")}" data-c="ci" data-k="note" placeholder="Es. gambe pesanti"></div>
+  <h2>Energia ultimi 14 giorni</h2><div class="card"><div class="moods">${moodStrip()}</div>${moodNote()}</div>
   <h2>Andamento</h2><div class="seg">${Object.entries(METRICS).map(([k,m])=>`<button class="${metric===k?"on":""}" data-a="metric" data-k="${k}">${m[0]}</button>`).join("")}</div>
   <div class="card"><div class="mut">Media ultimi 7: <b>${av} ${METRICS[metric][1]}</b></div>${chart(pts,METRICS[metric][2]," "+METRICS[metric][1])}</div>
   <div class="hint">Peso stabile ≠ fallimento. Dopo 8–12 settimane valuta carichi/rep, misure e foto. Se la forza cala e la fatica sale, controlla recupero e alimentazione prima di tagliare calorie.</div>`;
+}
+
+function moodStrip(){
+  const out=[];for(let i=13;i>=0;i--){const dt=iso(new Date(Date.now()-i*864e5)),v=S.traffic[dt];out.push(`<span title="${dt}">${v?FACE[v]:'<i></i>'}</span>`.replace("<svg",`<svg class="m ${v||""}"`))}
+  return out.join("");
+}
+function moodNote(){
+  const e=Object.entries(S.traffic);if(e.length<14)return `<div class="mut" style="margin-top:8px">Dopo 2 settimane di dati qui vedrai come cambia la tua energia.</div>`;
+  const c={verde:0,giallo:0,rosso:0};e.forEach(([,v])=>c[v]++);
+  return `<div class="mut" style="margin-top:8px">Finora: ${c.verde} giorni Carica!, ${c.giallo} Si va, ${c.rosso} Pianino.</div>`;
 }
 
 // ---------- IMPOSTAZIONI ----------
@@ -229,6 +248,8 @@ const A={
   open:d=>{S.openW=d.w;S.tab="pesi";save();render(false)},
   back:()=>{S.openW=null;save();render(false)},
   tab:d=>go(d.t),
+  day:d=>{viewDay=+d.i;viewDate=today();render()},
+  mob:d=>{const m=((S.mob[today()]=S.mob[today()]||{})[d.w]=S.mob[today()][d.w]||{});m[d.i]=!m[d.i];save();render()},
   tr:d=>{S.traffic[today()]=d.k;save();render()},
   plan:d=>{S.plan=d.p;save();render()},
   theme:d=>{S.theme=d.k;save();applyTheme();render()},

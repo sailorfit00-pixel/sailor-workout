@@ -68,9 +68,27 @@ const RUN = [
 ];
 
 const TRAFFIC = {
-  verde:{t:"Verde",d:"Sonno buono, DOMS lievi, carichi stabili → programma normale."},
-  giallo:{t:"Giallo",d:"Sonno ridotto o gambe pesanti → togli 1–2 accessori, corsa facile o assente. Salto impegnativo domani → non cercare cedimento oggi."},
-  rosso:{t:"Rosso",d:"Dolore, vertigini, calo marcato, malessere → interrompi e valuta supporto. Ciclo alterato, infortuni ripetuti o stanchezza persistente → verifica la salute."}
+  verde:{t:"Carica!",d:"Ottima energia: oggi spingi come da programma, con tecnica pulita."},
+  giallo:{t:"Si va",d:"Energia nella media: allenati come previsto, ma se qualcosa pesa togli un accessorio e lascia 1–2 ripetizioni in riserva. Se domani hai un salto impegnativo, non andare a cedimento."},
+  rosso:{t:"Pianino",d:"Oggi ascolta il corpo: scheda leggera, solo mobilità o una camminata sono scelte valide. Dolore, vertigini o malessere: fermati e chiedi un parere a un professionista."}
+};
+
+const MOBILITY = {
+  A:[["90/90 hip switch","5 per lato","Seduta, ginocchia a 90°: passa da un lato all'altro ruotando le anche."],
+     ["Cat-cow","8 ripetizioni","Quadrupedia: arrotonda e allunga la schiena con il respiro."],
+     ["World's greatest stretch","4 per lato","Affondo profondo, gomito verso il piede, poi apri il braccio al cielo."],
+     ["Caviglia al muro","10 per lato","Piede a 10 cm dal muro: porta il ginocchio avanti senza alzare il tallone."],
+     ["Glute bridge con pausa","2 × 10","Spingi con i talloni, pausa 2 secondi in alto: attiva i glutei."]],
+  B:[["Leg swing avanti-dietro","10 per lato","Appoggiata a un sostegno, oscilla la gamba con controllo."],
+     ["Cat-cow","8 ripetizioni","Quadrupedia: arrotonda e allunga la schiena con il respiro."],
+     ["Hip hinge con bastone","8 ripetizioni","Bastone lungo la schiena: porta indietro l'anca con schiena neutra."],
+     ["Cossack squat","5 per lato","Scendi su una gamba tenendo l'altra distesa, piedi a terra."],
+     ["Clamshell","10 per lato","Sul fianco, ginocchia piegate: apri il ginocchio alto senza ruotare il bacino."]],
+  C:[["Cerchi di spalle","10 avanti e 10 indietro","Ampi e lenti, senza alzare il collo."],
+     ["Thread the needle","6 per lato","Quadrupedia: fai passare il braccio sotto il petto e ruota il busto."],
+     ["Wall slide","8 ripetizioni","Schiena e avambracci al muro, scorri in alto e in basso."],
+     ["Rotazione toracica","6 per lato","Sul fianco, apri il braccio alto verso dietro seguendolo con lo sguardo."],
+     ["Dead bug","6 per lato","Schiena a terra, braccio e gamba opposti si allungano lentamente."]]
 };
 
 const TARGETS = {protein:[110,125], fat:[50,70]};
