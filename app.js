@@ -10,6 +10,10 @@ const dow=()=>(new Date().getDay()+6)%7;
 const rawWeek=()=>Math.floor((new Date(today())-new Date(S.start))/6048e5)+1;
 const cycleWeek=()=>Math.max(1,Math.min(8,rawWeek()));
 const ICON={check:'<svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>',moon:"🌙",sun:"☀️",auto:"🌓"};
+const FACE={
+verde:'<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="20"/><path d="M16 29c2 5 14 5 16 0"/><circle cx="17" cy="20" r="1.5" fill="currentColor"/><circle cx="31" cy="20" r="1.5" fill="currentColor"/></svg>',
+giallo:'<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="20"/><path d="M17 31h14"/><circle cx="17" cy="20" r="1.5" fill="currentColor"/><circle cx="31" cy="20" r="1.5" fill="currentColor"/></svg>',
+rosso:'<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="20"/><path d="M16 33c2-5 14-5 16 0"/><circle cx="17" cy="20" r="1.5" fill="currentColor"/><circle cx="31" cy="20" r="1.5" fill="currentColor"/></svg>'};
 const num=v=>v===""||v==null?NaN:parseFloat(String(v).replace(",","."));
 
 // ---------- tema ----------
@@ -104,7 +108,7 @@ function oggi(){
   return `${hero}
   <div class="card"><div class="ln" style="display:grid;gap:6px"><div><span class="mut">Mattina</span><br>${esc(d.am)}</div><div><span class="mut">Sera</span><br>${esc(d.pm)}</div></div></div>
   <h2>Questa settimana</h2><div class="strip">${wd.map((x,i)=>`<div class="${i===dow()?"today":""} ${trained(x)?"done":""}">${DAYS[i]}<b>${+x.slice(8)}</b></div>`).join("")}</div>
-  <h2>Come ti senti oggi?</h2><div class="tl">${Object.entries(TRAFFIC).map(([key,v])=>`<button class="${key} ${tr===key?"on":""}" data-a="tr" data-k="${key}"><i></i>${v.t}</button>`).join("")}</div>
+  <h2>Come ti senti oggi?</h2><div class="tl">${Object.entries(TRAFFIC).map(([key,v])=>`<button class="${key} ${tr===key?"on":""}" data-a="tr" data-k="${key}">${FACE[key]}${v.t}</button>`).join("")}</div>
   ${tr?`<div class="hint">${esc(TRAFFIC[tr].d)}</div>`:`<div class="mut" style="margin:8px 4px">Tocca per avere il consiglio sul carico di oggi.</div>`}
   <h2>Fase del ciclo</h2><div class="card"><span class="tag">${esc(phaseFor(cycleWeek()).t)}</span><div class="mut" style="margin-top:6px">${esc(phaseFor(cycleWeek()).d)}</div>${rawWeek()>8?`<div class="hint">Ciclo di 8 settimane completato: valuta i progressi e riparti dalle impostazioni.</div>`:""}</div>
   <div class="card mut">💡 ${esc(MYTHS[new Date().getDate()%MYTHS.length])}</div>`;
